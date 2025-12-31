@@ -50,11 +50,17 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 try:
     logging.info(f"Loading processor and model from {MODEL_NAME}...")
     processor = AutoProcessor.from_pretrained(MODEL_NAME)
+    # Use float32 for CPU but enable memory optimizations
     model = AutoModelForImageClassification.from_pretrained(
         MODEL_NAME,
-        low_cpu_mem_usage=True
+        low_cpu_mem_usage=True,
+        torch_dtype=torch.float32
     ).to(device)
     model.eval()
+    
+    # Optimize for multi-core CPU inference
+    torch.set_num_threads(8) 
+    logging.info(f"Torch threads set to 8 to match vCPUs")
     logging.info(f"Model loaded successfully on {device}")
     
     # Get labels from model config
@@ -134,8 +140,8 @@ def predict_image(path):
         raise Exception("Model or processor not loaded")
 
     image = Image.open(path).convert("RGB")
-    # Resize image to 224x224 to speed up processing
-    image = image.resize((224, 224))
+    # Resize image to 224x224 to speed up processing and reduce memory
+    image = image.resize((224, 224), Image.Resampling.LANCZOS)
     inputs = processor(images=image, return_tensors="pt").to(device)
 
     with torch.no_grad():
