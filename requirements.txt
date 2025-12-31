@@ -1,0 +1,10 @@
+Flask==3.0.0
+Flask-Limiter==3.5.0
+Werkzeug==3.0.1
+torch>=2.2.0
+torchvision>=0.17.0
+transformers>=4.38.0
+Pillow==10.1.0
+numpy==1.26.2
+gunicorn==21.2.0
+safetensors

@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; script-src 'self' 'unsafe-inline'; img-src 'self' data: https:; frame-src https://www.youtube.com https://www.youtube-nocookie.com;">
+    <title>Deepfake Detection Tool | Apex Broadcasting Network</title>
+    <link rel="icon" type="image/png" href="/static/Logo.jpg">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <body>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a1628 0%, #1a2940 50%, #0a1628 100%);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(147, 51, 234, 0.1) 0%, transparent 50%);
+            animation: pulse 15s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;    
+        }
+    
+        .quality-warning {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid #f59e0b;
+            color: #fde68a;
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
+        
+        .quality-warning i {
+            color: #f59e0b;
+            font-size: 1.2em;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 0.8; }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header with Logo */
+        .app-header {
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 20px;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .logo-image {
+            height: 80px;
+            width: auto;
+            filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.5));
+            animation: logoGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes logoGlow {
+            0%, 100% { filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.5)); }
+            50% { filter: drop-shadow(0 0 30px rgba(59, 130, 246, 0.8)); }
+        }
+
+        .header-title {
+            font-size: 2.5em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 5px;
+        }
+
+        .header-subtitle {
+            font-size: 1.1em;
+            color: #94a3b8;
+            font-weight: 300;
+        }
+
+        /* Tabbed Navigation */
+        .tab-navigation {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(10px);
+            padding: 15px;
+            border-radius: 20px;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .tab-button {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px 40px;
+            background: transparent;
+            border: 2px solid rgba(59, 130, 246, 0.3);
+            border-radius: 15px;
+            color: #94a3b8;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tab-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(59, 130, 246, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.4s ease, height 0.4s ease;
+        }
+
+        .tab-button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .tab-button:hover {
+            border-color: #3b82f6;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        .tab-button.active {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            border-color: transparent;
+            color: #fff;
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .tab-button i {
+            font-size: 1.3em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .tab-button span {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Glassmorphism Effect */
+        .glass-effect {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Detection Tab Styles */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            color: #3b82f6;
+        }
+
+        .section-header i {
+            font-size: 1.3em;
+        }
+
+        .upload-description {
+            color: #94a3b8;
+            margin-bottom: 25px;
+            font-size: 0.95em;
+        }
+
+        .file-upload-area {
+            border: 3px dashed rgba(59, 130, 246, 0.4);
+            border-radius: 15px;
+            padding: 60px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(59, 130, 246, 0.05);
+            margin-bottom: 25px;
+        }
+
+        .file-upload-area:hover,
+        .file-upload-area.drag-over {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+            transform: scale(1.02);
+        }
+
+        .file-upload-area.file-selected {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 4em;
+            color: #3b82f6;
+            margin-bottom: 20px;
+        }
+
+        .upload-text {
+            font-size: 1.1em;
+            color: #cbd5e1;
+        }
+
+        .upload-text strong {
+            color: #3b82f6;
+        }
+
+        .detect-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .detect-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5);
+        }
+
+        .detect-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Results Section */
+        .result-section {
+            margin-top: 30px;
+        }
+
+        .result-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .image-preview h4,
+        .detection-results h3 {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #3b82f6;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        .image-frame {
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 2px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .uploaded-image {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .image-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+            padding: 15px;
+            color: #fff;
+        }
+
+        .filename {
+            font-size: 0.9em;
+            word-break: break-all;
+        }
+
+        .result-card {
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid;
+        }
+
+        .result-card.real {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: #10b981;
+        }
+
+        .result-card.fake {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: #ef4444;
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .result-icon {
+            font-size: 3em;
+        }
+
+        .result-card.real .result-icon {
+            color: #10b981;
+        }
+
+        .result-card.fake .result-icon {
+            color: #ef4444;
+        }
+
+        .result-text h4 {
+            font-size: 1.5em;
+            margin-bottom: 5px;
+        }
+
+        .confidence-text {
+            color: #94a3b8;
+            font-size: 0.9em;
+        }
+
+        .confidence-bar {
+            position: relative;
+            width: 100%;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            transition: width 1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 15px;
+        }
+
+        .result-card.real .confidence-fill {
+            background: linear-gradient(90deg, #10b981, #059669);
+        }
+
+        .result-card.fake .confidence-fill {
+            background: linear-gradient(90deg, #ef4444, #dc2626);
+        }
+
+        .confidence-value {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-weight: 700;
+            font-size: 1.1em;
+            color: #fff;
+            z-index: 1;
+        }
+
+        .result-interpretation {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+
+        .result-interpretation i {
+            font-size: 1.2em;
+        }
+
+        /* Literacy Tab Styles */
+        .literacy-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .literacy-intro {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .literacy-intro h2 {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #fff 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .literacy-intro p {
+            font-size: 1.2em;
+            color: #94a3b8;
+            line-height: 1.6;
+        }
+
+        .content-section {
+            margin-bottom: 50px;
+        }
+
+        .content-section h3 {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 1.8em;
+            color: #3b82f6;
+            margin-bottom: 25px;
+        }
+
+        .content-section h3 i {
+            font-size: 1.2em;
+        }
+
+        .content-section p {
+            font-size: 1.05em;
+            line-height: 1.8;
+            color: #cbd5e1;
+            margin-bottom: 20px;
+        }
+
+        .content-section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .content-section li {
+            padding: 15px;
+            margin-bottom: 12px;
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid #3b82f6;
+            border-radius: 8px;
+            color: #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .content-section li:hover {
+            background: rgba(59, 130, 246, 0.15);
+            transform: translateX(5px);
+        }
+
+        .content-section strong {
+            color: #3b82f6;
+        }
+
+        /* Video Section */
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .video-card {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .video-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(59, 130, 246, 0.3);
+        }
+
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+        }
+
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .video-info {
+            padding: 20px;
+        }
+
+        .video-info h4 {
+            color: #fff;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .video-info p {
+            color: #94a3b8;
+            font-size: 0.9em;
+            margin: 0;
+        }
+
+        /* Resources Section */
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .resource-card {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(20px);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .resource-card:hover {
+            transform: translateY(-5px);
+            border-color: #3b82f6;
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .resource-card h4 {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #3b82f6;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .resource-card h4 i {
+            font-size: 1.3em;
+        }
+
+        .resource-card p {
+            color: #cbd5e1;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .resource-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .resource-link:hover {
+            color: #60a5fa;
+            gap: 12px;
+        }
+
+        /* Error Message */
+        .validation-error,
+        .error-message {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+            color: #fecaca;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .validation-error i,
+        .error-message i {
+            font-size: 1.3em;
+        }
+
+        /* Footer */
+        .app-footer {
+            margin-top: 60px;
+            padding: 30px;
+            text-align: center;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-size: 1.3em;
+            color: #3b82f6;
+            margin-bottom: 10px;
+        }
+
+        .footer-text p {
+            color: #94a3b8;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .result-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-title {
+                font-size: 1.8em;
+            }
+
+            .tab-navigation {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .tab-button {
+                padding: 12px 30px;
+                font-size: 1em;
+            }
+
+            .video-grid,
+            .resources-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .literacy-intro h2 {
+                font-size: 1.8em;
+            }
+
+            .content-section h3 {
+                font-size: 1.4em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-animation"></div>
+    
+    <div class="container">
+        <!-- Header with Logo -->
+        <header class="app-header">
+            <div class="logo-container">
+                <img src="/static/Logo.jpg" alt="Apex Broadcasting Network Logo" class="logo-image">
+            </div>
+            <h1 class="header-title">Deepfake Detection Tool</h1>
+            <p class="header-subtitle">Advancing Media Integrity through AI-Powered Technology</p>
+        </header>
+
+        <!-- Tabbed Navigation -->
+        <nav class="tab-navigation">
+            <button class="tab-button active" onclick="switchTab(event, 'detection')">
+                <i class="fas fa-search"></i>
+                <span>Detection</span>
+            </button>
+            <button class="tab-button" onclick="switchTab(event, 'literacy')">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Deepfake Literacy</span>
+            </button>
+        </nav>
+
+        <!-- Detection Tab -->
+        <div id="detection-tab" class="tab-content active">
+            <section class="glass-effect">
+                <div class="section-header">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <h3>Upload Image for Analysis</h3>
+                </div>
+                <p class="upload-description">Supported formats: JPEG, PNG • Maximum size: 30MB</p>
+
+                <div class="quality-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>
+                        For best accuracy, upload the original image.
+                        Avoid screenshots, social media downloads, or compressed files, as they may reduce detection reliability.
+                    </span>
+                </div>
+                
+                <form action="/predict" method="post" enctype="multipart/form-data" class="upload-form">
+                    <div class="file-upload-area" id="fileUploadArea">
+                        <div class="upload-icon">
+                            <i class="fas fa-image"></i>
+                        </div>
+                        <p class="upload-text">
+                            <strong>Click to browse</strong> or drag and drop your image here
+                        </p>
+                        <input type="file"
+                               id="imageInput"
+                               name="image"
+                               accept="image/jpeg,image/png"
+                               required
+                               style="display:none;">
+
+                    </div>
+                    
+                    <button type="submit" class="detect-btn" id="detectBtn" disabled>
+                        <i class="fas fa-search"></i>
+                        Analyze Image
+                    </button>
+                </form>
+            </section>
+
+            <!-- Results Section (shown when prediction exists) -->
+            <section class="result-section glass-effect" style="display: none;" id="resultsSection">
+                <div class="result-container">
+                    <div class="image-preview">
+                        <h4><i class="fas fa-image"></i> Analyzed Image</h4>
+                        <div class="image-frame">
+                            <img src="" alt="Uploaded image" class="uploaded-image" id="uploadedImage">
+                            <div class="image-overlay">
+                                <span class="filename" id="displayFilename">image.jpg</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="detection-results">
+                        <h3><i class="fas fa-chart-line"></i> Detection Results</h3>
+                        
+                        <div class="result-card real" id="resultCard">
+                            <div class="result-header">
+                                <div class="result-icon">
+                                    <i class="fas fa-check-circle" id="resultIcon"></i>
+                                </div>
+                                <div class="result-text">
+                                    <h4 id="predictionText">Classification: Real</h4>
+                                    <p class="confidence-text">Confidence Level</p>
+                                </div>
+                            </div>
+                            
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" id="confidenceFill" style="width: 0%"></div>
+                                <span class="confidence-value" id="confidenceValue">0%</span>
+                            </div>
+                            
+                            <div class="result-interpretation">
+                                <i class="fas fa-info-circle"></i>
+                                <p id="interpretationText">The image appears to be authentic based on our analysis.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Literacy Tab -->
+        <div id="literacy-tab" class="tab-content">
+            <div class="literacy-content">
+                <div class="literacy-intro glass-effect">
+                    <h2>Understanding Deepfakes</h2>
+                    <p>Deepfake technology represents both a remarkable achievement in artificial intelligence and a significant challenge to digital trust. Learn how to identify, understand, and protect yourself from manipulated media.</p>
+                </div>
+
+                <!-- What are Deepfakes -->
+                <section class="content-section glass-effect">
+                    <h3><i class="fas fa-question-circle"></i> What are Deepfakes?</h3>
+                    <p>Deepfakes are synthetic media created using artificial intelligence and deep learning techniques, particularly Generative Adversarial Networks (GANs). These technologies can create highly realistic fake images, videos, and audio that convincingly mimic real people.</p>
+                    <ul>
+                        <li><strong>Synthetic Media:</strong> Content generated entirely or partially by AI algorithms</li>
+                        <li><strong>Face Swapping:</strong> Replacing one person's face with another's in images or videos</li>
+                        <li><strong>Voice Cloning:</strong> Replicating someone's voice patterns and speech characteristics</li>
+                        <li><strong>Facial Reenactment:</strong> Transferring one person's expressions to another's face</li>
+                        <li><strong>Text-to-Speech Synthesis:</strong> Generating realistic speech from written text</li>
+                    </ul>
+                </section>
+
+                <!-- How Deepfakes are Created -->
+                <section class="content-section glass-effect">
+                    <h3><i class="fas fa-microchip"></i> How Deepfakes are Created</h3>
+                    <p>Creating deepfakes involves sophisticated machine learning techniques that have become increasingly accessible through open-source tools and cloud computing platforms.</p>
+                    <ul>
+                        <li><strong>Generative Adversarial Networks (GANs):</strong> Two neural networks compete—one generates fake content while the other tries to detect it, improving both over time</li>
+                        <li><strong>Autoencoder Architecture:</strong> Compresses facial features into a latent space and reconstructs them on a target face</li>
+                        <li><strong>Training Data Collection:</strong> Requires hundreds to thousands of images or video frames of the target person</li>
+                        <li><strong>Face Detection & Alignment:</strong> Algorithms identify and normalize facial features for consistent processing</li>
+                        <li><strong>Feature Extraction:</strong> Deep learning models learn unique characteristics like facial structure, lighting, and expressions</li>
+                        <li><strong>Rendering & Post-Processing:</strong> Blending, color correction, and refinement to create seamless results</li>
+                    </ul>
+                </section>
+
+                <!-- Risks and Societal Impact -->
+                <section class="content-section glass-effect">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Risks & Societal Impact</h3>
+                    <p>The misuse of deepfake technology poses serious threats to individuals, institutions, and society as a whole, undermining trust in digital media.</p>
+                    <ul>
+                        <li><strong>Misinformation & Fake News:</strong> Spreading false narratives through fabricated videos of public figures</li>
+                        <li><strong>Political Manipulation:</strong> Creating fake speeches or compromising situations to influence elections</li>
+                        <li><strong>Non-Consensual Intimate Content:</strong> Targeting individuals, particularly women, with fake explicit material</li>
+                        <li><strong>Financial Fraud:</strong> Impersonating executives in video calls to authorize fraudulent transactions</li>
+                        <li><strong>Identity Theft:</strong> Using someone's likeness for unauthorized commercial purposes</li>
+                        <li><strong>Erosion of Trust:</strong> Making people doubt the authenticity of all digital content</li>
+                        <li><strong>Cyberbullying & Harassment:</strong> Creating fake embarrassing content to harm reputations</li>
+                        <li><strong>National Security Threats:</strong> Fabricating intelligence or military communications</li>
+                    </ul>
+                </section>
+
+                <!-- How to Identify Deepfakes -->
+                <section class="content-section glass-effect">
+                    <h3><i class="fas fa-eye"></i> How to Identify Deepfake Images</h3>
+                    <p>While deepfakes are becoming increasingly sophisticated, there are still telltale signs that can help you identify manipulated images and videos.</p>
+                    <ul>
+                        <li><strong>Unnatural Facial Features:</strong> Look for asymmetry, unusual proportions, or misaligned features</li>
+                        <li><strong>Lighting Inconsistencies:</strong> Check if lighting on the face matches the environment</li>
+                        <li><strong>Blurring at Boundaries:</strong> Examine the edges where the face meets hair or background</li>
+                        <li><strong>Eye Movement & Blinking:</strong> In videos, unnatural eye movements or lack of blinking</li>
+                        <li><strong>Skin Texture Anomalies:</strong> Overly smooth or inconsistent skin texture and pores</li>
+                        <li><strong>Shadow Misalignment:</strong> Shadows that don't match the face's position or light source</li>
+                        <li><strong>Audio-Visual Sync:</strong> In videos, lips not matching speech patterns correctly</li>
+                        <li><strong>Compression Artifacts:</strong> Unusual patterns around manipulated areas due to re-encoding</li>
+                        <li><strong>Reflection & Glasses:</strong> Inconsistencies in reflections in eyeglasses or eyes</li>
+                        <li><strong>Micro-expressions:</strong> Missing subtle emotional expressions that occur naturally</li>
+                    </ul>
+                </section>
+
+                <!-- Educational Videos -->
+                <section class="content-section glass-effect">
+                    <h3><i class="fas fa-video"></i> Educational Videos</h3>
+                    <p>Watch these informative videos to deepen your understanding of deepfake technology and detection methods.</p>
+
+                    <div class="video-grid">
+
+                        <!-- New Video 1: Deepfake Image Detection -->
+                        <div class="video-card">
+                            <div class="video-container">
+                                <iframe src="https://www.youtube-nocookie.com/embed/GMoOCKkcd_w" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+                            </div>
+                            <div class="video-info">
+                                <h4>Deepfake Image Detection Explained</h4>
+                                <p>A focused introduction on detecting deepfakes</p>
+                            </div>
+                        </div>
+
+                        <!-- New Video 2: How to Spot AI‑Generated Images/Videos -->
+                        <div class="video-card">
+                            <div class="video-container">
+                                <iframe src="https://www.youtube-nocookie.com/embed/7akzhpx0EIU" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+                            </div>
+                            <div class="video-info">
+                                <h4>How to Spot Deepfakes & AI‑Generated Content</h4>
+                                <p>Tips and techniques for identifying AI‑generated images and video content</p>
+                            </div>
+                        </div>
+
+                        <!-- Existing Videos -->
+                        <div class="video-card">
+                            <div class="video-container">
+                                <iframe src="https://www.youtube-nocookie.com/embed/mUfJOQKdtAk" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+                            </div>
+                            <div class="video-info">
+                                <h4>What are Deepfakes?</h4>
+                                <p>An introduction to deepfake technology and its implications</p>
+                            </div>
+                        </div>
+
+                        <div class="video-card">
+                            <div class="video-container">
+                                <iframe src="https://www.youtube-nocookie.com/embed/gLoI9hAX9dw" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+                            </div>
+                            <div class="video-info">
+                                <h4>How to Spot Deepfakes</h4>
+                                <p>Learn practical techniques for identifying manipulated media</p>
+                            </div>
+                        </div>
+
+                        <div class="video-card">
+                            <div class="video-container">
+                                <iframe src="https://www.youtube-nocookie.com/embed/1OqFY_2JE1c" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+                            </div>
+                            <div class="video-info">
+                                <h4>The Threat of Deepfakes</h4>
+                                <p>Understanding the societal risks and security implications</p>
+                            </div>
+                        </div>
+
+                        <div class="video-card">
+                            <div class="video-container">
+                                <iframe src="https://www.youtube-nocookie.com/embed/oxXpB9pSETo" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+                            </div>
+                            <div class="video-info">
+                                <h4>Deepfake Detection Technology</h4>
+                                <p>How AI is being used to combat deepfakes</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- External Resources -->
+                <section class="content-section glass-effect">
+                    <h3><i class="fas fa-link"></i> Additional Resources</h3>
+                    <p>Explore these trusted sources for more information about deepfakes and digital media literacy.</p>
+                    
+                    <div class="resources-grid">
+                        <div class="resource-card">
+                            <h4><i class="fas fa-university"></i> MIT Media Lab</h4>
+                            <p>Research and tools for detecting manipulated media and understanding AI-generated content.</p>
+                            <a href="https://www.media.mit.edu/projects/detect-fakes/overview/" target="_blank" class="resource-link">
+                                Visit Resource <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        </div>
+
+                        <div class="resource-card">
+                            <h4><i class="fas fa-shield-alt"></i> Deepfake Detection Challenge</h4>
+                            <p>Facebook's initiative to advance deepfake detection technology through competition and research.</p>
+                            <a href="https://ai.meta.com/datasets/dfdc/" target="_blank" class="resource-link">
+                                Visit Resource <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        </div>
+
+                        <div class="resource-card">
+                            <h4><i class="fas fa-balance-scale"></i> FaceOnLive</h4>
+                            <p>Deepfake & AI-Generated Image Detector is designed to analyze images.</p>
+                            <a href="https://faceonlive.com/deepfake-detector/" target="_blank" class="resource-link">
+                                Visit Resource <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        </div>
+
+                        <div class="resource-card">
+                            <h4><i class="fas fa-book"></i> techtarget</h4>
+                            <p>What is deepfake technology?</p>
+                            <a href="https://www.techtarget.com/whatis/definition/deepfake" target="_blank" class="resource-link">
+                                Visit Resource <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        </div>
+
+                        <div class="resource-card">
+                            <h4><i class="fas fa-globe"></i> Reality Defender</h4>
+                            <p>Enterprise-grade deepfake detection platform for organizations and media outlets.</p>
+                            <a href="https://www.realitydefender.com/" target="_blank" class="resource-link">
+                                Visit Resource <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        </div>
+
+                        <div class="resource-card">
+                            <h4><i class="fas fa-newspaper"></i> CNN World</h4>
+                            <p>Finance worker pays out $25 million after video call with deepfake chief financial officer.</p>
+                            <a href="https://edition.cnn.com/2024/02/04/asia/deepfake-cfo-scam-hong-kong-intl-hnk" target="_blank" class="resource-link">
+                                Visit Resource <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <div class="footer-logo">
+                <i class="fas fa-broadcast-tower"></i>
+                <span>Apex Broadcasting Network</span>
+            </div>
+            <div class="footer-text">
+                <p>Advancing media integrity through AI-powered detection technology</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        function switchTab(event, tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        const fileUploadArea = document.getElementById('fileUploadArea');
+        const imageInput = document.getElementById('imageInput');
+        const detectBtn = document.getElementById('detectBtn');
+
+        fileUploadArea.addEventListener('click', () => imageInput.click());
+
+        imageInput.addEventListener('change', () => {
+            if (imageInput.files.length > 0) {
+                detectBtn.disabled = false;
+                fileUploadArea.classList.add('file-selected');
+                fileUploadArea.querySelector('.upload-text').innerHTML =
+                    `<strong>Selected:</strong> ${imageInput.files[0].name}`;
+            }
+        });
+
+        document.querySelector('.upload-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            if (imageInput.files.length === 0) return;
+
+            detectBtn.disabled = true;
+            detectBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+
+            const formData = new FormData();
+            formData.append('image', imageInput.files[0]);
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                let data;
+                const contentType = response.headers.get("content-type");
+                
+                if (contentType && contentType.includes("application/json")) {
+                    data = await response.json();
+                } else {
+                    const text = await response.text();
+                    throw new Error("Server returned an invalid response");
+                }
+                
+                if (!response.ok) {
+                    throw new Error(data.error || "Prediction failed");
+                }
+
+                showResults(
+                    data.label,
+                    data.confidence,
+                    imageInput.files[0]
+                );
+
+            } catch (error) {
+                alert(error.message);
+                console.error(error);
+            }
+
+            detectBtn.disabled = false;
+            detectBtn.innerHTML = '<i class="fas fa-search"></i> Analyze Image';
+        });
+
+        function showResults(prediction, confidence, file) {
+            const resultsSection = document.getElementById('resultsSection');
+            const resultCard = document.getElementById('resultCard');
+            const resultIcon = document.getElementById('resultIcon');
+            const predictionText = document.getElementById('predictionText');
+            const confidenceFill = document.getElementById('confidenceFill');
+            const confidenceValue = document.getElementById('confidenceValue');
+            const interpretationText = document.getElementById('interpretationText');
+            const uploadedImage = document.getElementById('uploadedImage');
+            const displayFilename = document.getElementById('displayFilename');
+
+            resultsSection.style.display = 'block';
+
+            if (prediction === 'Real') {
+                resultCard.className = 'result-card real';
+                resultIcon.className = 'fas fa-check-circle';
+                predictionText.textContent = 'Classification: Real';
+                interpretationText.textContent =
+                    'The image appears to be authentic based on our analysis.';
+            } else {
+                resultCard.className = 'result-card fake';
+                resultIcon.className = 'fas fa-exclamation-triangle';
+                predictionText.textContent = 'Classification: Fake';
+                interpretationText.textContent =
+                    'The image shows signs of manipulation or deepfake generation.';
+            }
+
+            confidenceFill.style.width = confidence + '%';
+            confidenceValue.textContent = confidence + '%';
+
+            const reader = new FileReader();
+            reader.onload = e => uploadedImage.src = e.target.result;
+            reader.readAsDataURL(file);
+
+            displayFilename.textContent = "Uploaded image";
+
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+</script>
+
+</body>
+</html>
