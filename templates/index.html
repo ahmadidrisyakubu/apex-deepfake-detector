@@ -7,7 +7,6 @@
     <title>Deepfake Detection Tool | Apex Broadcasting Network</title>
     <link rel="icon" type="image/png" href="/static/Logo.jpg">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <body style="zoom: 0.75; -moz-transform: scale(0.75); -moz-transform-origin: 0 0;">
     <body>
     <style>
         * {
@@ -1117,7 +1116,7 @@
 
             resultsSection.style.display = 'block';
 
-            if (prediction === 'Real') {
+            if (prediction.toLowerCase() === 'real') {
                 resultCard.className = 'result-card real';
                 resultIcon.className = 'fas fa-check-circle';
                 predictionText.textContent = 'Classification: Real';
