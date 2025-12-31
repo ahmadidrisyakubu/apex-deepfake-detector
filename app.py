@@ -50,22 +50,16 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 try:
     logging.info(f"Loading processor and model from {MODEL_NAME}...")
     processor = AutoProcessor.from_pretrained(MODEL_NAME)
-    # Use float32 for CPU but enable memory optimizations
     model = AutoModelForImageClassification.from_pretrained(
         MODEL_NAME,
-        low_cpu_mem_usage=True,
         torch_dtype=torch.float32
     ).to(device)
     model.eval()
     
-    # Optimize for multi-core CPU inference
+    # Optimize for multi-core CPU inference (8 vCPUs)
     torch.set_num_threads(8) 
     logging.info(f"Torch threads set to 8 to match vCPUs")
     logging.info(f"Model loaded successfully on {device}")
-    
-    # Get labels from model config
-    ID2LABEL = {int(k): v for k, v in model.config.id2label.items()}
-    logging.info(f"Model labels: {ID2LABEL}")
 except Exception as e:
     logging.error(f"Model load failed: {e}")
     model = None
@@ -131,43 +125,35 @@ def generate_file_hash(path):
 
 def predict_image(path):
     """
-    Predict if image is Real or Fake
-    Logic: 
-    - The model 'waleeyd/deepfake-detector-image' has labels like 'artificial' and 'real'.
-    - We map 'artificial' (or any AI label) to 'fake' and 'real' to 'real'.
+    Predict if image is Real or Fake using the user's provided logic.
     """
     if not model or not processor:
         raise Exception("Model or processor not loaded")
 
-    image = Image.open(path).convert("RGB")
+    img = Image.open(path).convert("RGB")
     
-    # Use the processor's built-in preprocessing for better accuracy
-    inputs = processor(images=image, return_tensors="pt").to(device)
-
+    # User's logic starts here
+    inputs = processor(images=img, return_tensors="pt").to(device)
     with torch.no_grad():
         outputs = model(**inputs)
-        logits = outputs.logits
-        probs = torch.softmax(logits, dim=-1).squeeze()
-
-    # Get predictions for all classes
-    predictions = {ID2LABEL[i].lower(): float(probs[i]) for i in range(len(ID2LABEL))}
+    logits = outputs.logits
+    predicted_class_idx = logits.argmax(-1).item()
     
-    # Logic to determine Fake vs Real
-    # The model waleeyd/deepfake-detector-image usually has:
-    # 0: artificial
-    # 1: real
+    # fix for id2label key type
+    id2label = {int(k): v for k, v in model.config.id2label.items()}
+    predicted_label = id2label[predicted_class_idx]
     
-    artificial_prob = predictions.get("artificial", 0.0)
-    real_prob = predictions.get("real", 0.0)
+    # probabilities for all classes
+    probabilities = torch.softmax(logits, dim=-1)
+    prob_dict = {id2label[i]: float(probabilities[0, i]) for i in range(len(id2label))}
     
-    if artificial_prob > real_prob:
-        label = "fake"
-        confidence = artificial_prob * 100
-    else:
-        label = "real"
-        confidence = real_prob * 100
+    # User's logic ends here
     
-    return label, round(confidence, 2)
+    # Map 'artificial' to 'fake' and 'real' to 'real'
+    final_label = "fake" if predicted_label.lower() == "artificial" else "real"
+    confidence = prob_dict[predicted_label] * 100
+    
+    return final_label, round(confidence, 2)
 
 # ===============================
 # Routes
