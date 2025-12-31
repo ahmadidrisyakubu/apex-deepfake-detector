@@ -128,7 +128,7 @@ def predict_image(path):
     Predict if image is Real or Fake
     Logic: 
     - The model 'waleeyd/deepfake-detector-image' has labels like 'artificial' and 'real'.
-    - We map 'artificial' (or any AI label) to 'Fake' and 'real' to 'Real'.
+    - We map 'artificial' (or any AI label) to 'fake' and 'real' to 'real'.
     """
     if not model or not processor:
         raise Exception("Model or processor not loaded")
@@ -145,9 +145,6 @@ def predict_image(path):
     predictions = {ID2LABEL[i].lower(): float(probs[i]) for i in range(len(ID2LABEL))}
     
     # Logic to determine Fake vs Real
-    # Usually 'artificial' is index 0 and 'real' is index 1 for this specific model
-    # But we'll check the labels dynamically
-    
     fake_prob = 0.0
     real_prob = 0.0
     
@@ -158,10 +155,10 @@ def predict_image(path):
             real_prob += prob
             
     if fake_prob > real_prob:
-        label = "Fake"
+        label = "fake"
         confidence = fake_prob * 100
     else:
-        label = "Real"
+        label = "real"
         confidence = real_prob * 100
     
     return label, round(confidence, 2)
@@ -193,7 +190,6 @@ def predict():
 
     try:
         img = Image.open(file).convert("RGB")
-        # Optional: Resize for consistency if needed, but processor usually handles this
         img.save(path, "JPEG", quality=95)
 
         label, confidence = predict_image(path)

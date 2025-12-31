@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+.venv
+env/
+venv/
+ENV/
+venv.bak/
+env.bak/
+uploads/*
+!uploads/.gitkeep
+security.log
+*.safetensors
+*.bin
+*.h5
+*.ot
