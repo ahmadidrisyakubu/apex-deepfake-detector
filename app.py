@@ -140,8 +140,8 @@ def predict_image(path):
         raise Exception("Model or processor not loaded")
 
     image = Image.open(path).convert("RGB")
-    # Resize image to 224x224 to speed up processing and reduce memory
-    image = image.resize((224, 224), Image.Resampling.LANCZOS)
+    
+    # Use the processor's built-in preprocessing for better accuracy
     inputs = processor(images=image, return_tensors="pt").to(device)
 
     with torch.no_grad():
@@ -153,18 +153,16 @@ def predict_image(path):
     predictions = {ID2LABEL[i].lower(): float(probs[i]) for i in range(len(ID2LABEL))}
     
     # Logic to determine Fake vs Real
-    fake_prob = 0.0
-    real_prob = 0.0
+    # The model waleeyd/deepfake-detector-image usually has:
+    # 0: artificial
+    # 1: real
     
-    for label, prob in predictions.items():
-        if "artificial" in label or "fake" in label:
-            fake_prob += prob
-        elif "real" in label:
-            real_prob += prob
-            
-    if fake_prob > real_prob:
+    artificial_prob = predictions.get("artificial", 0.0)
+    real_prob = predictions.get("real", 0.0)
+    
+    if artificial_prob > real_prob:
         label = "fake"
-        confidence = fake_prob * 100
+        confidence = artificial_prob * 100
     else:
         label = "real"
         confidence = real_prob * 100
