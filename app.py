@@ -52,7 +52,7 @@ try:
     processor = AutoProcessor.from_pretrained(MODEL_NAME)
     model = AutoModelForImageClassification.from_pretrained(
         MODEL_NAME,
-        torch_dtype=torch.float32
+        low_cpu_mem_usage=True
     ).to(device)
     model.eval()
     logging.info(f"Model loaded successfully on {device}")
@@ -134,6 +134,8 @@ def predict_image(path):
         raise Exception("Model or processor not loaded")
 
     image = Image.open(path).convert("RGB")
+    # Resize image to 224x224 to speed up processing
+    image = image.resize((224, 224))
     inputs = processor(images=image, return_tensors="pt").to(device)
 
     with torch.no_grad():
